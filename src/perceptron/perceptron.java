@@ -248,7 +248,7 @@ public class perceptron {
 	public static void main(String[] args) {
 		//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 		if (args.length<1) {
-			System.out.println("Usage: perceptron [train] [validation]");
+			System.out.println("Usage: perceptron [train] [tune] [test]");
 		}
 		
 		if (!fileExist(args[0])) {
