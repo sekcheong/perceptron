@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 
 class Feature {
@@ -229,13 +232,48 @@ class DataReader {
 	List<Instance> getExamples() {
 		return this._examples;
 	}
+	
+	void createTrainSet() {		
+		HashMap<Integer, List<Feature>> classes = new HashMap<Integer, List<Feature>>();
+		for (int i=0; i<this._labels.names.size(); i++) {
+			classes.put(i, new ArrayList<Feature>());
+		}
+		//classes.get
+		//Map <String, List<Feature>> classes = new Map<String, List<Feature>>();
+		//this._labels.names.size();
+		//List<Feature> positive = new ArrayList<Feature>();
+		//List<Feature> positive = new ArrayList<Feature>();
+	}
 
 }
 
 
 
-
 public class perceptron {
+	
+	public static final Random gen = new Random();
+	 
+	// version for array of ints
+//	public static void shuffle (int[] array) {
+//	    int n = array.length;
+//	    while (n > 1) {
+//	        int k = gen.nextInt(n--); //decrements after using the value
+//	        int temp = array[n];
+//	        array[n] = array[k];
+//	        array[k] = temp;
+//	    }
+//	}
+	
+	// version for array of references
+	public static void shuffle (Object[] array) {
+	    int n = array.length;
+	    while (n > 1) {
+	        int k = gen.nextInt(n--); //decrements after using the value
+	        Object temp = array[n];
+	        array[n] = array[k];
+	        array[k] = temp;
+	    }
+	}
 	
 	private static boolean fileExist(String path) {
 		File f = new File(path);
