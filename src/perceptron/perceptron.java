@@ -37,11 +37,64 @@ class Labels {
 	}
 }
 
+class NerualNet {
+	public double learningRate = 0.005;
+
+	public double[] generateInitialWeights(Instance instance) {
+		int size = instance.features.length + 1;
+		double w = Math.sqrt(1 / ((double) size));
+		
+		Random rand = new Random();
+		
+		double v = 1 - 2 * rand.nextDouble();
+		double[] weights = new double[size];
+		
+		for (int i = 0; i < weights.length; i++) {
+			weights[i] = (1 - 2 * rand.nextDouble()) * w;
+		}
+		return weights;
+	}
+
+	
+	public double sigmoid(double x) {
+		return ((double) 1) / (1 + Math.exp(-x));
+	}
+
+	
+	public double dsigmoid(double x) {
+		return sigmoid(x) * (1 - sigmoid(x));
+	}
+
+	
+	public double evaluate(double weights[], Instance instance) {
+		double result;
+		// compute the bias term
+		result = weights[0] * 1;
+		// compute W^T*X
+		for (int i = 0; i < instance.features.length; i++) {
+			result = result + ((double) instance.features[i]) * weights[i + 1];
+		}
+		return result;
+	}
+	
+	
+	public void train(double weights[], List<Instance> examples) {
+		Instance inst;
+		for (int i=0; i<examples.size(); i++) {
+			inst = examples.get(i);
+			double y = evaluate(weights, inst);
+			
+		}
+	}
+}
+
+
 class Instance {
 	public String name;
 	public int label;
 	public int[] features;
 }
+
 
 class DataReader {
 
@@ -58,8 +111,7 @@ class DataReader {
 		try {
 			FileReader freader = new FileReader(fileName);
 			_buffReader = new BufferedReader(freader);
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			System.out.println("Error:" + ex.getMessage());
 		}
 	}
@@ -110,6 +162,7 @@ class DataReader {
 		int numFeature = 0;
 		int numExamples = 0;
 		int featuresRead = 0;
+		int examplesRead = 0;
 
 		Feature feature = null;
 		Instance instance = null;
@@ -120,9 +173,9 @@ class DataReader {
 		List<Instance> examples = new ArrayList<Instance>();
 
 		boolean backup = false;
-
+		boolean done = false;
 		try {
-			while (true) {
+			while (!done) {
 
 				if (!backup) {
 					line = _buffReader.readLine();
@@ -173,9 +226,11 @@ class DataReader {
 					break;
 
 				case READ_EXAMPLES:
+					if (examplesRead == numExamples)
+						done = true;
 					instance = readOneInstance(line, labels, features);
 					examples.add(instance);
-
+					examplesRead++;
 					break;
 
 				default:
@@ -184,16 +239,15 @@ class DataReader {
 				}
 			}
 
-			for (int i = 0; i < examples.size(); i++) {
-				// printExample(examples.get(i));
-			}
+			// for (int i = 0; i < examples.size(); i++) {
+			// // printExample(examples.get(i));
+			// }
 
 			this._features = features;
 			this._labels = labels;
 			this._examples = examples;
 
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			System.out.println("Error:" + ex.getMessage());
 		}
 	}
@@ -216,7 +270,8 @@ class DataReader {
 			classes.put(i, new ArrayList<Feature>());
 		}
 		// classes.get
-		// Map <String, List<Feature>> classes = new Map<String, List<Feature>>();
+		// Map <String, List<Feature>> classes = new Map<String,
+		// List<Feature>>();
 		// this._labels.names.size();
 		// List<Feature> positive = new ArrayList<Feature>();
 		// List<Feature> positive = new ArrayList<Feature>();
@@ -226,30 +281,6 @@ class DataReader {
 
 public class perceptron {
 
-	public static final Random gen = new Random();
-
-	// version for array of ints
-	// public static void shuffle (int[] array) {
-	// int n = array.length;
-	// while (n > 1) {
-	// int k = gen.nextInt(n--); //decrements after using the value
-	// int temp = array[n];
-	// array[n] = array[k];
-	// array[k] = temp;
-	// }
-	// }
-
-	// version for array of references
-	public static void shuffle(Object[] array) {
-		int n = array.length;
-		while (n > 1) {
-			int k = gen.nextInt(n--); // decrements after using the value
-			Object temp = array[n];
-			array[n] = array[k];
-			array[k] = temp;
-		}
-	}
-
 	private static boolean fileExist(String path) {
 		File f = new File(path);
 		if (f.exists() && !f.isDirectory()) {
@@ -258,7 +289,6 @@ public class perceptron {
 		return false;
 	}
 
-	@SuppressWarnings("unused")
 	public static void printExample(Instance example, Labels labels, List<Feature> features) {
 		System.out.printf("%10s", example.name);
 		System.out.print(" ");
@@ -318,17 +348,42 @@ public class perceptron {
 				printExample(examples.get(0), reader.getLabels(), reader.getFeatures());
 				examples.remove(0);
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			System.out.println("Error spliting data set into train, tune, and test set!");
 		}
 	}
 
+	private static double evaluateOneInstance(Instance instance, double[] weights) {
+		double result = weights[0] * 1;
+		for (int i = 0; i < instance.features.length; i++) {
+			result = result + ((double) instance.features[i]) * weights[i + 1];
+		}
+		return result;
+	}
+
+	private static double calculateAccuracy(List<Instance> tuneSet, double[] weights) {
+		return 0;
+	}
+
+	private static double sigmoid(double x) {
+		return ((double) 1) / (1 + Math.exp(-x));
+	}
+
+	
+	public static double dsigmoid(double x) {
+		return sigmoid(x) * (1 - sigmoid(x));
+	}
+	
 	public static void main(String[] args) {
+
+		System.out.println(sigmoid(0));
+		System.out.println(dsigmoid(0));
+		
 		// System.out.println("Working Directory = " +
 		// System.getProperty(be"user.dir"));
-		
-		//splitDataSet(args[0]);
+		// splitDataSet(args[0]);
+		//double w[] = NeuralNet.
+		NerualNet net = new NerualNet();		
 		
 		if (args.length < 3) {
 			System.out.println("Usage: perceptron [train] [tune] [test]");
@@ -347,11 +402,17 @@ public class perceptron {
 			tune.readData();
 			DataReader test = new DataReader(args[2]);
 			test.readData();
-			System.out.printf("train:%d\n",  train.getExamples().size());
-			System.out.printf("tune:%d\n",  tune.getExamples().size());
-			System.out.printf("test:%d\n",  test.getExamples().size());
-		}
-		catch (Exception ex) {
+//			System.out.printf("train:%d\n", train.getExamples().size());
+//			System.out.printf("tune:%d\n", tune.getExamples().size());
+//			System.out.printf("test:%d\n", test.getExamples().size());
+						
+			double w[] = net.generateInitialWeights(train.getExamples().get(0));
+//			for (int i=0; i<w.length; i++) {
+//				System.out.printf("w[%d]=%2.4f\n", i, w[i]);
+//			}
+						
+			
+		} catch (Exception ex) {
 			System.out.print("Error reading data file:'" + args[0] + "'.\nDetails:" + ex.getMessage());
 		}
 
