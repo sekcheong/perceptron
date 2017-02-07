@@ -291,7 +291,7 @@ public class perceptron {
 			reader.readData();
 			List<Instance> examples = reader.getExamples();
 			Collections.shuffle(examples);
-			int train = (int) (examples.size() * 0.7);
+			int train = (int) (examples.size() * 0.8);
 			int tune = (int) (examples.size() - train);
 			int test = 0;
 
@@ -327,6 +327,8 @@ public class perceptron {
 	public static void main(String[] args) {
 		// System.out.println("Working Directory = " +
 		// System.getProperty(be"user.dir"));
+		
+		//splitDataSet(args[0]);
 		
 		if (args.length < 3) {
 			System.out.println("Usage: perceptron [train] [tune] [test]");
