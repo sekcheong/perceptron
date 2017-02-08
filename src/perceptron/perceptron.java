@@ -37,7 +37,7 @@ class Labels {
 }
 
 class NerualNet {
-	public double η = 0.0001;
+	public double eta = 0.0001;
 	public double targetAccuracy = 0.76;
 
 	public double[] initialWeights(Instance instance) {
@@ -104,7 +104,7 @@ class NerualNet {
 				
 				//update the weight
 				for (int k = 0; k < weights.length; k++) {
-					weights[k] = weights[k] + η * error * inst.x[k];
+					weights[k] = weights[k] + eta * error * inst.x[k];
 				}
 				
 				//check the accuracy
@@ -459,18 +459,18 @@ public class perceptron {
 			net.train(w, train.getExamples(), tune.getExamples());
 			net.printWeight(w);
 			
-			for (int i=0; i<test.getExamples().size(); i++) {
-				Instance inst = test.getExamples().get(i);
-				double p = net.predict(w, inst);
-				int pl = p<0 ? 0 : 1;
-				String predicted = test.getLabels().names.get(pl);
-				String actual = test.getLabels().names.get(inst.label);
-				boolean correct = (pl==inst.label);
-				System.out.printf("%s %s %s\n", inst.name, predicted, actual);
-			}
+//			for (int i=0; i<test.getExamples().size(); i++) {
+//				Instance inst = test.getExamples().get(i);
+//				double p = net.predict(w, inst);
+//				int pl = p<0 ? 0 : 1;
+//				String predicted = test.getLabels().names.get(pl);
+//				String actual = test.getLabels().names.get(inst.label);
+//				boolean correct = (pl==inst.label);
+//				System.out.printf("%s %s %s\n", inst.name, predicted, actual);
+//			}
 			
-		  //double acc = net.accuracy(w, test.getExamples());
-		  //System.out.println("accuracy:" + acc);
+		  double acc = net.accuracy(w, test.getExamples());
+		  System.out.println("accuracy:" + acc);
 		}
 		catch (Exception ex) {
 			System.out.print("Error reading data file:'" + args[0] + "'.\nDetails:" + ex.getMessage());
