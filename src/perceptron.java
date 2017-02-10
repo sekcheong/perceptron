@@ -1,5 +1,3 @@
-package perceptron;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -52,12 +50,11 @@ class NerualNet {
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = rand.nextDouble() * w;
 		}
-		
+
 		weights[0] = 1;
 		return weights;
 	}
 
-	
 	public double dotProduct(double w[], double x[]) {
 		double result = 0;
 		for (int i = 0; i < w.length; i++) {
@@ -66,7 +63,6 @@ class NerualNet {
 		return result;
 	}
 
-	
 	public void printWeight(double weights[]) {
 		System.out.printf("w = [");
 		for (int i = 0; i < weights.length; i++) {
@@ -74,7 +70,6 @@ class NerualNet {
 		}
 		System.out.printf("]\n");
 	}
-	
 
 	public void train(double weights[], List<Instance> examples, List<Instance> tune) {
 		Instance inst;
@@ -90,43 +85,42 @@ class NerualNet {
 		int p = 0;
 		int q = 0;
 		boolean stop = false;
-		
-		//save the best weights we have seen so far
+
+		// save the best weights we have seen so far
 		double[] bestWeights = new double[weights.length];
-		
+
 		for (int n = 0; n < maxloop; n++) {
 			for (int i = 0; i < examples.size(); i++) {
 				inst = examples.get(i);
-				
-				//compute the predicted value
+
+				// compute the predicted value
 				y_hat = (dotProduct(weights, inst.x));
-				
+
 				fx = Math.signum(y_hat);
 				y = (inst.label == 0) ? -1.0 : 1.0;
 				error = y - fx;
-				
-				//update the weight
+
+				// update the weight
 				for (int k = 0; k < weights.length; k++) {
 					weights[k] = weights[k] + eta * error * inst.x[k];
 				}
-				
-				//check the accuracy
+
+				// check the accuracy
 				double acc = accuracy(weights, tune);
 				if (acc > maxAcc) {
 					p = n;
 					q = i;
 					maxAcc = acc;
 					bestWeights = weights;
-				}				
+				}
 			}
 		}
-		
-		for (int i=0; i<weights.length; i++) {
+
+		for (int i = 0; i < weights.length; i++) {
 			weights[i] = bestWeights[i];
 		}
 	}
 
-	
 	public double accuracy(double weights[], List<Instance> test) {
 		int correct = 0;
 		for (int i = 0; i < test.size(); i++) {
@@ -141,7 +135,6 @@ class NerualNet {
 		return rate;
 	}
 
-	
 	public double predict(double weights[], Instance instance) {
 		double y_hat = dotProduct(weights, instance.x);
 		double fx = Math.signum(y_hat);
@@ -149,7 +142,6 @@ class NerualNet {
 	}
 
 }
-
 
 class Instance {
 	public String name;
@@ -165,7 +157,6 @@ class Instance {
 
 	public double[] x = null;
 }
-
 
 class DataReader {
 
@@ -212,7 +203,6 @@ class DataReader {
 		return f;
 	}
 
-	
 	private Instance readOneInstance(String line, Labels lbls, List<Feature> features) {
 		line = line.trim();
 		line = line.replaceAll("\\s+", " ");
@@ -313,7 +303,7 @@ class DataReader {
 
 				}
 			}
-			
+
 			this._features = features;
 			this._labels = labels;
 			this._examples = examples;
@@ -444,6 +434,7 @@ public class perceptron {
 
 		if (args.length < 3) {
 			System.out.println("Usage: perceptron [train] [tune] [test]");
+			return;
 		}
 
 		for (int i = 0; i < 3; i++) {
@@ -452,7 +443,6 @@ public class perceptron {
 			}
 		}
 
-		
 		double bestWeight[] = null;
 		double bestRate = 0;
 		double w[];
@@ -464,35 +454,34 @@ public class perceptron {
 			DataReader test = new DataReader(args[2]);
 			test.readData();
 			int maxTry = 5;
-			for (int i=0; i<maxTry; i++) {
+			for (int i = 0; i < maxTry; i++) {
 				w = net.initialWeights(train.getExamples().get(0));
 				net.train(w, train.getExamples(), tune.getExamples());
 				double acc = net.accuracy(w, tune.getExamples());
-				if (acc>bestRate) {
+				if (acc > bestRate) {
 					bestWeight = w;
 					bestRate = acc;
 				}
-				System.out.printf("Iteration %d of %d : Accuracy:%2.4f\n", i+1, maxTry, bestRate);
+				System.out.printf("Iteration %d of %d : Accuracy:%2.4f\n", i + 1, maxTry, bestRate);
 			}
-			
+
 			System.out.printf("%10s %10s %10s %10s\n", "Name", "Predicted", "Actual", "Error");
 			System.out.printf("-------------------------------------------\n");
-			for (int i=0; i<test.getExamples().size(); i++) {
+			for (int i = 0; i < test.getExamples().size(); i++) {
 				Instance inst = test.getExamples().get(i);
 				double p = net.predict(bestWeight, inst);
-				int pl = p<0 ? 0 : 1;
+				int pl = p < 0 ? 0 : 1;
 				String predicted = test.getLabels().names.get(pl);
 				String actual = test.getLabels().names.get(inst.label);
-				boolean correct = (pl==inst.label);
-				System.out.printf("%10s %10s %10s %10s\n", inst.name, predicted, actual, (predicted==actual) ? "": "x");
+				boolean correct = (pl == inst.label);
+				System.out.printf("%10s %10s %10s %10s\n", inst.name, predicted, actual, (predicted == actual) ? "" : "x");
 			}
 			System.out.printf("-------------------------------------------\n");
-			
-			
-		  double acc = net.accuracy(bestWeight, test.getExamples());
-		  System.out.println("Accuracy:" + acc);
-		  System.out.println("Learned weights:");
-		  net.printWeight(bestWeight);
+
+			double acc = net.accuracy(bestWeight, test.getExamples());
+			System.out.println("Accuracy:" + acc);
+			System.out.println("Learned weights:");
+			net.printWeight(bestWeight);
 		}
 		catch (Exception ex) {
 			System.out.print("Error reading data file:'" + args[0] + "'.\nDetails:" + ex.getMessage());
