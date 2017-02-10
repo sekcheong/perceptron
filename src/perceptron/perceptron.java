@@ -38,7 +38,7 @@ class Labels {
 
 class NerualNet {
 	public double eta = 0.0001;
-	public double targetAccuracy = 0.76;
+	public double targetAccuracy = 0.760;
 
 	public double[] initialWeights(Instance instance) {
 
@@ -86,11 +86,14 @@ class NerualNet {
 
 		double maxAcc = 0;
 
-		int maxloop = 1000;
+		int maxloop = 500;
 		int p = 0;
 		int q = 0;
 		boolean stop = false;
-
+		
+		//save the best weights we have seen so far
+		double[] bestWeights = new double[weights.length];
+		
 		for (int n = 0; n < maxloop; n++) {
 			for (int i = 0; i < examples.size(); i++) {
 				inst = examples.get(i);
@@ -113,11 +116,13 @@ class NerualNet {
 					p = n;
 					q = i;
 					maxAcc = acc;
-				}
-				if (acc > targetAccuracy) {
-					return;
-				}
+					bestWeights = weights;
+				}				
 			}
+		}
+		
+		for (int i=0; i<weights.length; i++) {
+			weights[i] = bestWeights[i];
 		}
 	}
 
@@ -447,6 +452,10 @@ public class perceptron {
 			}
 		}
 
+		
+		double bestWeight[] = null;
+		double bestRate = 0;
+		double w[];
 		try {
 			DataReader train = new DataReader(args[0]);
 			train.readData();
@@ -454,23 +463,36 @@ public class perceptron {
 			tune.readData();
 			DataReader test = new DataReader(args[2]);
 			test.readData();
-
-			double w[] = net.initialWeights(train.getExamples().get(0));
-			net.train(w, train.getExamples(), tune.getExamples());
-			net.printWeight(w);
+			int maxTry = 5;
+			for (int i=0; i<maxTry; i++) {
+				w = net.initialWeights(train.getExamples().get(0));
+				net.train(w, train.getExamples(), tune.getExamples());
+				double acc = net.accuracy(w, tune.getExamples());
+				if (acc>bestRate) {
+					bestWeight = w;
+					bestRate = acc;
+				}
+				System.out.printf("Iteration %d of %d : Accuracy:%2.4f\n", i+1, maxTry, bestRate);
+			}
 			
-//			for (int i=0; i<test.getExamples().size(); i++) {
-//				Instance inst = test.getExamples().get(i);
-//				double p = net.predict(w, inst);
-//				int pl = p<0 ? 0 : 1;
-//				String predicted = test.getLabels().names.get(pl);
-//				String actual = test.getLabels().names.get(inst.label);
-//				boolean correct = (pl==inst.label);
-//				System.out.printf("%s %s %s\n", inst.name, predicted, actual);
-//			}
+			System.out.printf("%10s %10s %10s %10s\n", "Name", "Predicted", "Actual", "Error");
+			System.out.printf("-------------------------------------------\n");
+			for (int i=0; i<test.getExamples().size(); i++) {
+				Instance inst = test.getExamples().get(i);
+				double p = net.predict(bestWeight, inst);
+				int pl = p<0 ? 0 : 1;
+				String predicted = test.getLabels().names.get(pl);
+				String actual = test.getLabels().names.get(inst.label);
+				boolean correct = (pl==inst.label);
+				System.out.printf("%10s %10s %10s %10s\n", inst.name, predicted, actual, (predicted==actual) ? "": "x");
+			}
+			System.out.printf("-------------------------------------------\n");
 			
-		  double acc = net.accuracy(w, test.getExamples());
-		  System.out.println("accuracy:" + acc);
+			
+		  double acc = net.accuracy(bestWeight, test.getExamples());
+		  System.out.println("Accuracy:" + acc);
+		  System.out.println("Learned weights:");
+		  net.printWeight(bestWeight);
 		}
 		catch (Exception ex) {
 			System.out.print("Error reading data file:'" + args[0] + "'.\nDetails:" + ex.getMessage());
